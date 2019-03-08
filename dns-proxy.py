@@ -4,13 +4,13 @@ import ssl
 import thread
 
 def make_request(encrypted_socket,query):
-    tcp_query = dns_query(query)
+    tcp_query = build_query(query)
     encrypted_socket.send(tcp_query)
     result = encrypted_socket.recv(1024)
 
     return result
 
-def dns_query(query):
+def build_query(query):
     pre_length = "\x00" + chr(len(query))
     prefixed_query = pre_length + query
 
@@ -38,7 +38,7 @@ def request_handler(data, addr, cloudflare_ip):
 if __name__ == '__main__':
     cloudflare_ip = '1.1.1.1'
     cloudflare_port = 853
-    proxy_ip = '127.0.0.1'
+    proxy_ip = '192.0.0.1'
     proxy_port= 853
 
     try:
