@@ -3,6 +3,19 @@ import socket
 import ssl
 import thread
 
+def make_request(encrypted_socket,query):
+    tcp_query = dns_query(query)
+    encrypted_socket.send(tcp_query)
+    result = encrypted_socket.recv(1024)
+
+    return result
+
+def dns_query(query):
+    pre_length = "\x00" + chr(len(query))
+    prefixed_query = pre_length + query
+
+    return prefixed_query
+
 def encrypted_tcp_connection(cloudflare_ip):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(5)
@@ -17,8 +30,8 @@ def encrypted_tcp_connection(cloudflare_ip):
     return encrypted_socket
 
 def request_handler(data, addr, cloudflare_ip):
-  tls_conn_sock = encrypted_tcp_connection(cloudflare_ip)
-  tcp_result = sendquery(tls_conn_sock, data)
+  encrypted_socket = encrypted_tcp_connection(cloudflare_ip)
+  tcp_result = make_request(encrypted_socket, data)
   udp_result = tcp_result[2:]
   sock.sendto(udp_result,addr)
 
